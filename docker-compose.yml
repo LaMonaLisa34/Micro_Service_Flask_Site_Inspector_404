@@ -17,7 +17,7 @@ services:
       timeout: 3s
       retries: 10
 
-  inspector:               # renomme "crawler" en "inspector" pour éviter la confusion
+  inspector:
     build: .
     container_name: site_inspector_404
     restart: always
