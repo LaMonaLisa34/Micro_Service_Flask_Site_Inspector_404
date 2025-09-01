@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres-inspector
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: siteinspector404
+    ports:
+      - "5433:5432"        # 5433 sur l'hôte -> 5432 DANS le conteneur
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d siteinspector404"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  inspector:               # renomme "crawler" en "inspector" pour éviter la confusion
+    build: .
+    container_name: site_inspector_404
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      FLASK_ENV: development
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@postgres:5432/siteinspector404
+      APP_HOST: 0.0.0.0
+      APP_PORT: "5000"
+    ports:
+      - "5052:5000"
+    command: [
+      "bash","-lc",
+      "until nc -z postgres 5432; do echo 'waiting for db'; sleep 2; done; python run.py"
+    ]
