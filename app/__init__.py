@@ -1,3 +1,4 @@
+# app/__init__.py
 from flask import Flask
 from .routes import bp as routes_bp
 from .models import init_db
